@@ -1,8 +1,31 @@
-import { ADD_FETCHED_DATA, ADD_POST, REMOVE_POST } from './types.js';
+import { POSTS_FETCHED_DATA, ADD_POST, REMOVE_POST } from './types.js';
 import axios from 'axios';
 
-const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+const apiPostsUrl = 'https://jsonplaceholder.typicode.com/posts';
+const apiCommentsUrl = 'https://jsonplaceholder.typicode.com/comments/';
 
+const getCommentsForPost = (comments, id) => {
+    const allComments = [];
+    comments.map((comment) => {
+      if (comment.postId === id) {
+        allComments.push(comment);
+      }
+    });
+    return allComments;
+};
+  
+const finalPostsWithComments = (posts, comments) => {
+    const allPosts = [];
+    posts.map((post) => {
+        allPosts.push({
+        ...post,
+        comments: getCommentsForPost(comments, post.id),
+        })
+    })
+    return allPosts;
+};
+
+  
 export const addPosts =  (data) => {
     return {
       type: ADD_POST,
@@ -22,18 +45,23 @@ export const removePosts = id => {
         id
       }
     }
-}
+};
 
-export const fetchData = () => {
+export const fetchDataPosts = () => {
     return (dispatch) => {
-        return axios.get(apiUrl)
-            .then(response => {
-                return response.data
+        return axios.get(apiPostsUrl)
+            .then(posts => {
+                return axios.get(apiCommentsUrl)
+                .then(comments => {
+                    return finalPostsWithComments(posts.data, comments.data)
+                })
+                .catch(error => {
+                    return null;
+                });
             })
             .then(data => {
-                console.log(data);
                 dispatch({
-                    type: ADD_FETCHED_DATA,
+                    type: POSTS_FETCHED_DATA,
                     payload: data
                 })
             })

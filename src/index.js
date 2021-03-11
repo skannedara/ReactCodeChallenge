@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 
 import rootReducer from './reducers';
-import { fetchData } from './actions';
+import { fetchDataPosts } from './actions';
 
 
 const saveState = (state) => {
@@ -33,11 +33,12 @@ const getState = () => {
 
 const initialState = getState();
 const store = createStore(rootReducer,initialState, applyMiddleware(thunk));
-store.dispatch(fetchData());
+
+store.dispatch(fetchDataPosts());
 
 store.subscribe(()=>{
   saveState({
-    favorites: store.getState().favorites   
+    posts: store.getState().posts   
   })
 })
 
